@@ -230,6 +230,7 @@ export const webhookCheckout = expressAsyncHandler(
       );
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
+      return;
     }
     console.log(event);
 
