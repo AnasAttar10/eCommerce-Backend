@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import Cart, { TCartItem } from "@models/cart";
 import { CustomRequest } from "../types/costumeRequest";
-import { Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import expressAsyncHandler from "express-async-handler";
 import { getAll, getOne } from "./handlersFactory";
 import ApiError from "@utils/apiError";
@@ -177,61 +177,63 @@ export const checkoutSession = expressAsyncHandler(
   }
 );
 
-// const createCardOrder = async (session:any) => {
-//   const cartId = session.client_reference_id;
-//   const shippingAddress = session.metadata;
-//   const oderPrice = session.amount_total / 100;
+const createCardOrder = async (session: any) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const oderPrice = session.amount_total / 100;
 
-//   const cart = await Cart.findById(cartId);
-//   const user = await User.findOne({ email: session.customer_email });
+  const cart = await Cart.findById(cartId);
+  const user = await User.findOne({ email: session.customer_email });
 
-//   // 3) Create order with default paymentMethodType card
-//   const order = await Order.create({
-//     user: user?._id,
-//     cartItems: cart?.cartItems,
-//     shippingAddress,
-//     totalOrderPrice: oderPrice,
-//     isPaid: true,
-//     paidAt: Date.now(),
-//     paymentMethodType: "card",
-//   });
+  // 3) Create order with default paymentMethodType card
+  const order = await Order.create({
+    user: user?._id,
+    cartItems: cart?.cartItems,
+    shippingAddress,
+    totalOrderPrice: oderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: "card",
+  });
 
-//   // 4) After creating order, decrement product quantity, increment product sold
-//   if (order) {
-//     const bulkOption = cart?.cartItems.map((item) => ({
-//       updateOne: {
-//         filter: { _id: item.product },
-//         update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
-//       },
-//     }));
-//     await Product.bulkWrite(bulkOption, {});
+  // 4) After creating order, decrement product quantity, increment product sold
+  if (order) {
+    const bulkOption = cart?.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    if (bulkOption) await Product.bulkWrite(bulkOption, {});
 
-//     // 5) Clear cart depend on cartId
-//     await Cart.findByIdAndDelete(cartId);
-//   }
-// };
+    // 5) Clear cart depend on cartId
+    await Cart.findByIdAndDelete(cartId);
+  }
+};
 
 // @desc    This webhook will run when stripe payment success paid
-// @route   POST /webhook-checkout
+// @route   POST /webhook
 // @access  Protected/User
-// exports.webhookCheckout = expressAsyncHandler(async (req, res, next) => {
-//   const sig = req.headers["stripe-signature"];
+export const webhookCheckout = expressAsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const sig = req.headers["stripe-signature"] as string;
 
-//   let event;
+    let event;
 
-//   try {
-//     event = stripe.webhooks.constructEvent(
-//       req.body,
-//       sig,
-//       process.env.STRIPE_WEBHOOK_SECRET
-//     );
-//   } catch (err) {
-//     return res.status(400).send(`Webhook Error: ${err.message}`);
-//   }
-//   if (event.type === "checkout.session.completed") {
-//     //  Create order
-//     createCardOrder(event.data.object);
-//   }
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.WEBHOOK_KEY as string
+      );
+    } catch (err: any) {
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    if (event?.type === "checkout.session.completed") {
+      //  Create order
+      createCardOrder(event.data.object);
+    }
 
-//   res.status(200).json({ received: true });
-// });
+    res.status(200).json({ received: true });
+  }
+);

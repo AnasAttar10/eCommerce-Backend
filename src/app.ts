@@ -20,10 +20,16 @@ import addressRoutes from "@routes/addressRoute";
 import couponRoutes from "@routes/couponRoute";
 import cartRoutes from "@routes/cartRoute";
 import ordersRoutes from "@routes/orderRoute";
+import { webhookCheckout } from "@services/orderService";
 const app = express();
 app.use(cors());
 app.options("*", cors());
 app.use(compression());
+app.post(
+  "/webhook",
+  express.json({ type: "application/json" }),
+  webhookCheckout
+);
 // Middleware
 app.use(function (req: Request, res: Response, next: NextFunction) {
   res.header("Access-Control-Allow-Origin", "*");
