@@ -217,37 +217,20 @@ const createCardOrder = async (session: any) => {
 // @access  Protected/User
 export const webhookCheckout = expressAsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("anas attar test");
-    console.log("header");
-    console.log(req.headers);
-    console.log("body");
-    console.log(req.body);
-
     const sig = req.headers["stripe-signature"];
-    console.log("Signature:", sig);
-    console.log("Signature:", process.env.WEBHOOK_KEY as string);
     let event;
-    console.log("check in webhook");
-
     try {
-      console.log("event");
-
       event = stripe.webhooks.constructEvent(
         req.body.toString(),
         sig as string | string[],
         process.env.WEBHOOK_KEY as string
       );
-      console.log(event);
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    console.log(event);
-
     if (event?.type === "checkout.session.completed") {
       //  Create order
-      console.log("anas");
-
       createCardOrder(event.data.object);
     }
 
