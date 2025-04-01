@@ -223,12 +223,11 @@ export const webhookCheckout = expressAsyncHandler(
     console.log("check in webhook");
 
     try {
-      if (sig)
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          process.env.WEBHOOK_KEY as string
-        );
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig as string | string[],
+        process.env.WEBHOOK_KEY as string
+      );
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
