@@ -217,16 +217,18 @@ const createCardOrder = async (session: any) => {
 // @access  Protected/User
 export const webhookCheckout = expressAsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const sig = req.headers["stripe-signature"] as string;
+    const sig = req.headers["stripe-signature"];
 
     let event;
+    console.log("check in webhook");
 
     try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.WEBHOOK_KEY as string
-      );
+      if (sig)
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.WEBHOOK_KEY as string
+        );
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
