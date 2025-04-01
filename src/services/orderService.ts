@@ -229,8 +229,12 @@ export const webhookCheckout = expressAsyncHandler(
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
+    console.log(event);
+
     if (event?.type === "checkout.session.completed") {
       //  Create order
+      console.log("anas");
+
       createCardOrder(event.data.object);
     }
 
