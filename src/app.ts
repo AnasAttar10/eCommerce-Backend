@@ -44,7 +44,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.post(
   "/webhook",
-  express.raw({ type: "application/json" }),
+  express.text({ type: "application/json" }),
   webhookCheckout
 );
 app.use(express.static(path.join(__dirname, "node_modules")));
