@@ -224,7 +224,8 @@ export const webhookCheckout = expressAsyncHandler(
     console.log(req.body);
 
     const sig = req.headers["stripe-signature"];
-
+    console.log("Signature:", sig);
+    console.log("Signature:", process.env.WEBHOOK_KEY as string);
     let event;
     console.log("check in webhook");
 
@@ -232,7 +233,7 @@ export const webhookCheckout = expressAsyncHandler(
       console.log("event");
 
       event = stripe.webhooks.constructEvent(
-        req.body,
+        req.body.toString(),
         sig as string | string[],
         process.env.WEBHOOK_KEY as string
       );
