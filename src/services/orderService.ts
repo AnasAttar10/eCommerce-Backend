@@ -133,6 +133,7 @@ export const updateOrderToDelivered = expressAsyncHandler(
 // @access  Protected/User
 export const checkoutSession = expressAsyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const FRONTEND_URL = "http://localhost:5173";
     // app settings
     const taxPrice = 0;
     const shippingPrice = 0;
@@ -164,10 +165,10 @@ export const checkoutSession = expressAsyncHandler(
         },
       ],
       mode: "payment",
-      success_url: `${req.protocol}://${req.get("host")}/profile/orders`,
-      // success_url: FRONTEND_URL + "/profile/orders",
-      cancel_url: `${req.protocol}://${req.get("host")}/api/v1/cart`,
-      // cancel_url: FRONTEND_URL + "/cart",
+      // success_url: `${req.protocol}://${req.get("host")}/profile/orders`,
+      success_url: FRONTEND_URL + "/profile/orders",
+      // cancel_url: `${req.protocol}://${req.get("host")}/api/v1/cart`,
+      cancel_url: FRONTEND_URL + "/cart",
       customer_email: req.user.email,
       client_reference_id: req.params.cartId,
       metadata: req.body.shippingAddress,
