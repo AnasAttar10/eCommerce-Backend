@@ -225,11 +225,14 @@ export const webhookCheckout = expressAsyncHandler(
     console.log("check in webhook");
 
     try {
+      console.log("event");
+
       event = stripe.webhooks.constructEvent(
         req.body,
         sig as string | string[],
         process.env.WEBHOOK_KEY as string
       );
+      console.log(event);
     } catch (err: any) {
       res.status(400).send(`Webhook Error: ${err.message}`);
       return;
