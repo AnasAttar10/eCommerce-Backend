@@ -218,6 +218,10 @@ const createCardOrder = async (session: any) => {
 export const webhookCheckout = expressAsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     console.log("anas attar test");
+    console.log("header");
+    console.log(req.headers);
+    console.log("body");
+    console.log(req.body);
 
     const sig = req.headers["stripe-signature"];
 
