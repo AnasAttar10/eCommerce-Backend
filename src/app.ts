@@ -25,7 +25,11 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 app.use(compression());
-
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
 // Middleware
 app.use(function (req: Request, res: Response, next: NextFunction) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -42,11 +46,7 @@ if (process.env.NODE_ENV == "development") app.use(morgan("dev"));
 app.use(ExpressMongoSanitize());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  webhookCheckout
-);
+
 app.use(express.static(path.join(__dirname, "node_modules")));
 app.use(hpp());
 app.use("/api/v1/brands", brandRoutes);
