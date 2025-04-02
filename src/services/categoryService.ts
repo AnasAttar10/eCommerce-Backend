@@ -10,7 +10,7 @@ import {
 // @desc    Get list of categories
 // @route   GET /api/v1/categories
 // @access  Public
-export const getAllCategories = getAll(Category);
+export const getAllCategories = getAll(Category, "name");
 
 // @desc    Get specific category by id
 // @route   GET /api/v1/categories/:id
