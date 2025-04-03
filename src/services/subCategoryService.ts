@@ -34,7 +34,7 @@ export const createFilterObj = (
 // @desc    Get list of subcategories
 // @route   GET /api/v1/subcategories
 // @access  Public
-export const getSubCategories = getAll(SubCategory);
+export const getSubCategories = getAll(SubCategory, "name");
 
 // @desc    Get specific subcategory by id
 // @route   GET /api/v1/subcategories/:id

@@ -10,7 +10,7 @@ import {
 // @desc    Get list of coupons
 // @route   GET /api/v1/coupons
 // @access  Private/Admin-Manager
-export const getCoupons = getAll(Coupon);
+export const getCoupons = getAll(Coupon, "name");
 
 // @desc    Get specific coupon by id
 // @route   GET /api/v1/coupons/:id
