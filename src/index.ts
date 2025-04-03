@@ -9,10 +9,10 @@ import app from "./app";
 // connect DB
 dbConnection();
 
-const port = process.env.PORT || 6000;
+const port = process.env.PORT || 5000;
 
 const server = app.listen(port, () => {
-  console.log(` Server is running at http://localhost:${port}`);
+  console.log(` Server is running at port ${port}`);
 });
 
 // Handle rejection outside express
