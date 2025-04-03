@@ -44,6 +44,7 @@ export const getAll = <T>(Model: TGetAll<T>, searchField: string = "text") =>
 
       const countOfDocuments =
         await apiFeaturesForCount.mongooseQuery.countDocuments();
+
       const apiFeatures = new ApiFeatures(query, queryString)
         .filter()
         .sort()
