@@ -3,8 +3,10 @@ import {
   checkoutSession,
   createCashOrder,
   filterOrderForLoggedUser,
+  filterOrdersByUserEmail,
   findAllOrders,
   findSpecificOrder,
+  removeOrder,
   updateOrderToDelivered,
   updateOrderToPaid,
 } from "@services/orderService";
@@ -13,7 +15,12 @@ const router = express.Router();
 router.use(protect);
 router.post("/checkout-session/:cartId", allowedTo("user"), checkoutSession);
 router.post("/:cartId", allowedTo("user"), createCashOrder);
-router.get("/admin", allowedTo("admin", "manager"), findAllOrders);
+router.get(
+  "/admin",
+  allowedTo("admin", "manager"),
+  filterOrdersByUserEmail,
+  findAllOrders
+);
 router.get(
   "/",
   allowedTo("user", "admin", "manager"),
@@ -27,5 +34,6 @@ router.put(
   allowedTo("admin", "manager"),
   updateOrderToDelivered
 );
+router.delete("/:id", allowedTo("admin", "manager"), removeOrder);
 
 export default router;

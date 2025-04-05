@@ -38,6 +38,7 @@ export const getAll = <T>(Model: TGetAll<T>, searchField: string = "text") =>
       const queryStringFilter = req.query;
       const queryString = req.query;
       const countQuery = Model.find(filter);
+
       const apiFeaturesForCount = new ApiFeatures(countQuery, queryStringFilter)
         .filter()
         .search(searchField);

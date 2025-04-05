@@ -3,7 +3,7 @@ import Cart, { TCartItem } from "@models/cart";
 import { CustomRequest } from "../types/costumeRequest";
 import { Request, Response, NextFunction } from "express";
 import expressAsyncHandler from "express-async-handler";
-import { getAll, getOne } from "./handlersFactory";
+import { deleteOne, getAll, getOne } from "./handlersFactory";
 import ApiError from "@utils/apiError";
 import Order from "@models/order";
 import Product from "@models/product";
@@ -62,6 +62,15 @@ export const filterOrderForLoggedUser = expressAsyncHandler(
   }
 );
 
+export const filterOrdersByUserEmail = expressAsyncHandler(
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    if (req.query.orderEmail) {
+      const user = await User.findOne({ email: req.query.orderEmail });
+      req.filterObj = { user: user?._id };
+    }
+    next();
+  }
+);
 // @desc    Get all orders
 // @route   POST /api/v1/orders
 // @access  Protected/User-Admin-Manager
@@ -127,7 +136,7 @@ export const updateOrderToDelivered = expressAsyncHandler(
     res.status(200).json({ status: "success", data: updatedOrder });
   }
 );
-
+export const removeOrder = deleteOne(Order);
 // @desc    Get checkout session from stripe and send it as response
 // @route   GET /api/v1/orders/checkout-session/cartId
 // @access  Protected/User

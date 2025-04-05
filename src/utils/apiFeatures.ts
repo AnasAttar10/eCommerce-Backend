@@ -61,7 +61,14 @@ class ApiFeatures<T> {
   }
   filter() {
     const queryStringObj: { [key: string]: any } = { ...this.queryString };
-    const excludesFields = ["page", "sort", "keyword", "limit", "fields"];
+    const excludesFields = [
+      "page",
+      "sort",
+      "keyword",
+      "limit",
+      "fields",
+      "orderEmail",
+    ];
     excludesFields.forEach((field) => delete queryStringObj[field]);
 
     for (const key in queryStringObj) {
