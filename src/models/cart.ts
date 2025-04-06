@@ -1,5 +1,4 @@
 import mongoose, { Query } from "mongoose";
-import path from "path";
 export type TCartItem = {
   _id?: mongoose.Types.ObjectId;
   product: mongoose.Types.ObjectId;
@@ -41,7 +40,7 @@ const cartSchema = new mongoose.Schema(
 cartSchema.pre<Query<TCart, TCart>>(/^find/, function (next) {
   this.populate({
     path: "cartItems.product",
-    select: "imageCover title sold",
+    select: "imageCover title sold quantity",
   });
   next();
 });
