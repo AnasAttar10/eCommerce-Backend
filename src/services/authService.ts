@@ -152,7 +152,7 @@ export const forgotPassword = expressAsyncHandler(
 
     try {
       sendEmail({
-        to: "programmera961@gmail.com",
+        to: req.body.email,
         from: "anasattar2010@gmail.com",
         subject: "Your Password Reset Code (valid for 10 minutes)",
         text: `Hi ${user.name},\n\nWe received a request to reset the password on your account.\nYour reset code is: ${resetCode}\n\nEnter this code to complete the reset.\n\nThanks for helping us keep your account safe.\n\nThe Qalqilia Shop Team`,
