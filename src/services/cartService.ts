@@ -1,4 +1,4 @@
-import Cart, { TCart } from "@models/cart";
+import Cart, { TCart, TCartItem } from "@models/cart";
 import { CustomRequest } from "../types/costumeRequest";
 import { Response, NextFunction } from "express";
 import expressAsyncHandler from "express-async-handler";
@@ -9,19 +9,77 @@ import Coupon from "@models/coupon";
 const calcTotalCartPrice = (cart: TCart) => {
   let totalPrice = 0;
   cart.cartItems.forEach((item) => {
-    totalPrice += item.quantity * item.price;
+    const quantity = item.quantity ?? 1;
+    const price = item.price ?? 0;
+    totalPrice += quantity * price;
   });
   cart.totalCartPrice = totalPrice;
   cart.totalPriceAfterDiscount = undefined;
   return totalPrice;
 };
+// @desc    Add localStorageProducts to  cart
+// @route   POST /api/v1/cart/sync
+// @access  Private/User
+export const syncCartAfterLogin = expressAsyncHandler(
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const localItems: TCartItem[] = req.body.cartItems;
+
+    if (!Array.isArray(localItems) || localItems.length === 0) {
+      return next(new ApiError(`No items to sync`, 404));
+    }
+
+    let cart = await Cart.findOne({ user: req.user._id });
+
+    if (!cart) {
+      cart = await Cart.create({
+        user: req.user._id,
+        cartItems: localItems.map((item) => ({
+          product: item._id,
+          color: item.color,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      });
+    } else {
+      for (const localItem of localItems) {
+        const existingIndex = cart.cartItems.findIndex(
+          (item) =>
+            item.product.toString() === localItem._id?.toString() &&
+            item.color === localItem.color
+        );
+
+        if (existingIndex > -1) {
+          cart.cartItems[existingIndex].quantity += localItem.quantity;
+        } else {
+          if (localItem._id)
+            cart.cartItems.push({
+              product: localItem._id,
+              color: localItem.color,
+              quantity: localItem.quantity,
+              price: localItem.price,
+            });
+        }
+      }
+    }
+
+    calcTotalCartPrice(cart);
+    await cart.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Cart synced successfully",
+      numOfCartItems: cart.cartItems.length,
+      data: cart,
+    });
+  }
+);
 
 // @desc    Add product to  cart
 // @route   POST /api/v1/cart
 // @access  Private/User
 export const addProductToCart = expressAsyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const { productId, color } = req.body;
+    const { productId, color, quantity } = req.body;
     const product = await Product.findById(productId);
     if (!product)
       return next(new ApiError(`no product with this id ${productId}`, 404));
@@ -31,7 +89,17 @@ export const addProductToCart = expressAsyncHandler(
     if (!cart) {
       cart = await Cart.create({
         user: req.user._id,
-        cartItems: [{ product: productId, color, price: product?.price }],
+        cartItems: [
+          {
+            product: productId,
+            color,
+            quantity: quantity ?? 1,
+            price:
+              product?.priceAfterDiscount > 0
+                ? product?.priceAfterDiscount
+                : product?.price,
+          },
+        ],
       });
     } else {
       const productIndex = cart.cartItems.findIndex((item) =>
@@ -43,14 +111,17 @@ export const addProductToCart = expressAsyncHandler(
 
       if (productIndex > -1) {
         const cartItem = cart.cartItems[productIndex];
-        cartItem.quantity += 1;
+        cartItem.quantity += quantity ?? 1;
         cart.cartItems[productIndex] = cartItem;
       } else {
         cart.cartItems.push({
           product: productId,
           color,
-          quantity: 1,
-          price: product.price,
+          quantity: quantity ?? 1,
+          price:
+            product?.priceAfterDiscount > 0
+              ? product?.priceAfterDiscount
+              : product.price,
         });
       }
     }
